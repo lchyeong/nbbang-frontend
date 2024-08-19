@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import axiosInterceptors from "../../api/axiosInterceptors";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,7 +10,22 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `https://oauth2/authorization/google`;
+    // 새 창을 띄워 구글 로그인을 진행
+    const googleLoginWindow = window.open(
+      `https:/nbbang.store/api/oauth2/authorization/google`,
+      "_blank",
+      "width=500,height=600",
+    );
+
+    // 부모 창에서 새 창의 메시지를 기다림
+    const messageListener = (event) => {
+      if (event.data === "success") {
+        navigate("/redirect"); // 인증이 성공하면 리디렉션
+        window.removeEventListener("message", messageListener);
+      }
+    };
+
+    window.addEventListener("message", messageListener);
   };
 
   const handleSignUpClick = () => {
@@ -19,11 +34,10 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center justify-start h-full">
-      <div className="w-full max-w-md"> {/* Adjusted margin-top */}
-        <button
-          onClick={() => navigate("/")}
-          className="p-1 pb-10 rounded"
-        >
+      <div className="w-full max-w-md">
+        {" "}
+        {/* Adjusted margin-top */}
+        <button onClick={() => navigate("/")} className="p-1 pb-10 rounded">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4"
