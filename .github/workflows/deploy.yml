@@ -69,10 +69,6 @@ jobs:
               # 3001 컨테이너를 3000으로 전환
               sudo docker rename nbbang-fe-new nbbang-fe
 
-              # Nginx 설정 원복
-              echo "$SSH_PASSWORD" | sudo -S sed -i 's/127.0.0.1:3001;/127.0.0.1:3000;/' /etc/nginx/sites-available/default
-              echo "$SSH_PASSWORD" | sudo -S systemctl reload nginx
-
             else
               echo "3000 포트가 사용되지 않음. 3000으로 새 컨테이너 시작."
               sudo docker-compose up -d frontend
