@@ -16,6 +16,9 @@ COPY . .
 # React 프로젝트 빌드
 RUN npm run build
 
+# curl 설치
+RUN apt-get update && apt-get install -y curl
+
 # 정적 파일을 서빙할 경로 설정
 ENV NODE_ENV=production
 ENV PORT=3000
