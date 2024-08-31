@@ -43,14 +43,16 @@ jobs:
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem -tt $USERNAME@$HOST <<EOF
             echo "$SSH_PASSWORD" | sudo -S docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nbbang-fe:latest
-
+            
+            cd /var/www
+            
             # 3000 포트 체크
             if curl -f http://127.0.0.1:3000; then
               echo "3000 포트가 사용 중입니다. 3001로 새 컨테이너 시작."
               sudo docker-compose up -d frontend_new
 
               # 새로운 컨테이너가 정상적으로 실행되었는지 확인
-              sleep 10
+              sleep 15
               if ! curl -f http://127.0.0.1:3001; then
                 echo "새로운 프론트엔드 인스턴스 시작 실패"
                 exit 1
