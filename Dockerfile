@@ -16,8 +16,11 @@ COPY . .
 # React 프로젝트 빌드
 RUN npm run build
 
-# curl 설치
-RUN apt-get update && apt-get install -y curl
+# # curl 설치
+# RUN apt-get update && apt-get install -y curl
+
+# curl 설치 (Alpine 기반 이미지일 경우)
+RUN apk --no-cache add curl
 
 # 정적 파일을 서빙할 경로 설정
 ENV NODE_ENV=production
