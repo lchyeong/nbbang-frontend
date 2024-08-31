@@ -52,16 +52,11 @@ jobs:
               sudo docker-compose up -d frontend_new
 
               # 새로운 컨테이너가 정상적으로 실행되었는지 확인
-              sleep 15
+              sleep 20
               if ! curl -f http://127.0.0.1:3001; then
                 echo "새로운 프론트엔드 인스턴스 시작 실패"
                 exit 1
               fi
-
-              # Nginx 설정에서 새로운 인스턴스로 트래픽 전환
-              echo "$SSH_PASSWORD" | sudo -S sed -i 's/127.0.0.1:3000;/127.0.0.1:3001;/' /etc/nginx/sites-available/default
-              echo "$SSH_PASSWORD" | sudo -S systemctl reload nginx
-
               # 기존 프론트엔드 컨테이너 중지 및 제거
               sudo docker-compose stop frontend
               sudo docker-compose rm -f frontend
@@ -74,7 +69,7 @@ jobs:
               sudo docker-compose up -d frontend
 
               # 새 컨테이너가 정상적으로 실행되었는지 확인
-              sleep 10
+              sleep 20
               if ! curl -f http://127.0.0.1:3000; then
                 echo "새 프론트엔드 인스턴스 시작 실패"
                 exit 1
