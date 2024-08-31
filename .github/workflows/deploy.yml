@@ -25,7 +25,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: chany91/nbbang-fe:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nbbang-fe:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,17 +42,26 @@ jobs:
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem -tt $USERNAME@$HOST <<EOF
-            echo "$SSH_PASSWORD" | sudo -S docker pull chany91/nbbang-fe:latest
+            echo "$SSH_PASSWORD" | sudo -S docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nbbang-fe:latest
 
-            # 새로운 프론트엔드 컨테이너 실행
-            echo "$SSH_PASSWORD" | sudo -S docker run -d --name nbbang-fe-new -p 3001:3000 --network nbbang-network chany91/nbbang-fe:latest
+            # 새로운 프론트엔드 인스턴스를 Docker Compose로 시작
+            cd /var/www
+            echo "$SSH_PASSWORD" | sudo -S docker-compose up -d frontend_new
 
-            # 기존 프론트엔드 컨테이너 중지 및 제거 후 교체
-            if [ "$(sudo docker ps -q -f name=nbbang-fe)" ]; then
-              echo "$SSH_PASSWORD" | sudo -S docker stop nbbang-fe
-              echo "$SSH_PASSWORD" | sudo -S docker rm nbbang-fe
-              echo "$SSH_PASSWORD" | sudo -S docker rename nbbang-fe-new nbbang-fe
-              echo "$SSH_PASSWORD" | sudo -S docker update --restart always nbbang-fe
-            fi
+            # Nginx 설정에서 새로운 인스턴스로 트래픽 전환
+            echo "$SSH_PASSWORD" | sudo -S sed -i 's/127.0.0.1:3000;/127.0.0.1:3001;/' /etc/nginx/sites-available/default
+            echo "$SSH_PASSWORD" | sudo -S systemctl reload nginx
+
+            # 기존 프론트엔드 컨테이너 정리
+            echo "$SSH_PASSWORD" | sudo -S docker-compose stop frontend
+            echo "$SSH_PASSWORD" | sudo -S docker-compose rm -f frontend
+
+            # 새 프론트엔드 인스턴스 이름 변경
+            echo "$SSH_PASSWORD" | sudo -S docker rename nbbang-fe-new nbbang-fe
+
+            # Nginx 설정 원복
+            echo "$SSH_PASSWORD" | sudo -S sed -i 's/127.0.0.1:3001;/127.0.0.1:3000;/' /etc/nginx/sites-available/default
+            echo "$SSH_PASSWORD" | sudo -S systemctl reload nginx
+
           EOF
           rm private_key.pem

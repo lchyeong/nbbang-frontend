@@ -28,8 +28,3 @@ EXPOSE 3000
 
 # 애플리케이션 실행 (빌드된 정적 파일 서빙)
 CMD ["serve", "-s", "build", "-l", "3000"]
-
-# docker build -t kimhyeonpil/react-image .
-# docker push kimhyeonpil/react-image
-# docker pull kimhyeonpil/react-image
-# docker run -d -p 80:3000 --name react-server kimhyeonpil/react-image
